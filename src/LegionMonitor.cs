@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -65,6 +66,9 @@ public class MonitorWindow : Window {
     [DllImport("nvml.dll", EntryPoint = "nvmlDeviceGetHandleByIndex_v2")]
     public static extern int nvmlDeviceGetHandleByIndex(uint index, out IntPtr device);
 
+    [DllImport("nvml.dll", EntryPoint = "nvmlDeviceGetName")]
+    public static extern int nvmlDeviceGetName(IntPtr device, StringBuilder name, uint length);
+
     [DllImport("nvml.dll", EntryPoint = "nvmlDeviceGetTemperature")]
     public static extern int nvmlDeviceGetTemperature(IntPtr device, int sensorType, out uint temp);
 
@@ -101,7 +105,13 @@ public class MonitorWindow : Window {
     private long prevKernel = 0;
     private long prevUser = 0;
 
+    // Hardware Names (Auto-detected)
+    private string detectedCpu = "CPU";
+    private string detectedGpu = "GPU";
+    private int detectedRamGb = 16;
+
     // UI elements
+    private TextBlock txtSubtitle;
     private TextBlock txtProfileBadge;
 
     private TextBlock txtCpuTitle;
@@ -131,7 +141,7 @@ public class MonitorWindow : Window {
     private DispatcherTimer timer;
 
     public MonitorWindow() {
-        this.Title = "Legion System Monitor";
+        this.Title = "LegionPulse Monitor";
         this.Width = 320;
         this.Height = 405;
         this.WindowStyle = WindowStyle.None;
@@ -145,6 +155,7 @@ public class MonitorWindow : Window {
         this.Left = screenW - 340;
         this.Top = 30;
 
+        DetectHardware();
         LoadPosition();
         InitNvml();
         InitCpuPowerCounter();
@@ -166,15 +177,57 @@ public class MonitorWindow : Window {
         UpdateStats();
     }
 
+    private void DetectHardware() {
+        // 1. Detect CPU
+        try {
+            RegistryKey key = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0");
+            if (key != null) {
+                object val = key.GetValue("ProcessorNameString");
+                key.Close();
+                if (val != null) {
+                    string s = val.ToString().Trim();
+                    s = s.Replace("11th Gen ", "").Replace("12th Gen ", "").Replace("13th Gen ", "").Replace("14th Gen ", "");
+                    s = s.Replace("Intel(R) Core(TM) ", "").Replace("AMD Ryzen ", "Ryzen ");
+                    int atIdx = s.IndexOf("@");
+                    if (atIdx > 0) s = s.Substring(0, atIdx).Trim();
+                    detectedCpu = s;
+                }
+            }
+        } catch {
+            detectedCpu = "Intel/AMD";
+        }
+
+        // 2. Detect RAM
+        try {
+            MEMORYSTATUSEX mem = new MEMORYSTATUSEX();
+            mem.dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX));
+            if (GlobalMemoryStatusEx(ref mem)) {
+                double total = mem.ullTotalPhys / (1024.0 * 1024 * 1024);
+                detectedRamGb = (int)Math.Round(total);
+            }
+        } catch {
+            detectedRamGb = 16;
+        }
+    }
+
     private void InitNvml() {
         try {
             int res = nvmlInit();
             if (res == 0) {
                 int devRes = nvmlDeviceGetHandleByIndex(0, out nvmlDev);
                 nvmlAvailable = (devRes == 0);
+                if (nvmlAvailable) {
+                    StringBuilder sb = new StringBuilder(64);
+                    if (nvmlDeviceGetName(nvmlDev, sb, 64) == 0) {
+                        string s = sb.ToString().Trim();
+                        s = s.Replace("NVIDIA GeForce ", "").Replace(" Laptop GPU", "").Replace(" GPU", "");
+                        detectedGpu = s;
+                    }
+                }
             }
         } catch {
             nvmlAvailable = false;
+            detectedGpu = "GPU";
         }
     }
 
@@ -188,7 +241,6 @@ public class MonitorWindow : Window {
     }
 
     private void BuildUI() {
-        // Main container border
         Border root = new Border();
         root.Background = new SolidColorBrush(Color.FromArgb(238, 18, 22, 31)); // 93% deep dark acrylic
         root.BorderBrush = new SolidColorBrush(Color.FromRgb(48, 54, 61));
@@ -196,7 +248,6 @@ public class MonitorWindow : Window {
         root.CornerRadius = new CornerRadius(14);
         root.Padding = new Thickness(16, 14, 16, 14);
 
-        // Drop shadow for floating effect
         DropShadowEffect shadow = new DropShadowEffect();
         shadow.Color = Colors.Black;
         shadow.BlurRadius = 22;
@@ -217,18 +268,18 @@ public class MonitorWindow : Window {
 
         StackPanel titleBox = new StackPanel();
         TextBlock title = new TextBlock();
-        title.Text = "⚡ LEGION MONITOR";
+        title.Text = "⚡ LEGIONPULSE";
         title.FontWeight = FontWeights.Bold;
         title.FontSize = 13;
         title.Foreground = new SolidColorBrush(Color.FromRgb(88, 166, 255));
         titleBox.Children.Add(title);
 
-        TextBlock subtitle = new TextBlock();
-        subtitle.Text = "i7-11800H • RTX 3060 • 64GB";
-        subtitle.FontSize = 10;
-        subtitle.Foreground = new SolidColorBrush(Color.FromRgb(139, 148, 158));
-        subtitle.Margin = new Thickness(0, 1, 0, 0);
-        titleBox.Children.Add(subtitle);
+        txtSubtitle = new TextBlock();
+        txtSubtitle.Text = string.Format("{0} • {1} • {2}GB", detectedCpu, detectedGpu, detectedRamGb);
+        txtSubtitle.FontSize = 10;
+        txtSubtitle.Foreground = new SolidColorBrush(Color.FromRgb(139, 148, 158));
+        txtSubtitle.Margin = new Thickness(0, 1, 0, 0);
+        titleBox.Children.Add(txtSubtitle);
 
         Grid.SetColumn(titleBox, 0);
         headerGrid.Children.Add(titleBox);
@@ -297,7 +348,7 @@ public class MonitorWindow : Window {
 
         // 3. CPU SECTION
         txtCpuTitle = new TextBlock();
-        txtCpuTitle.Text = "CPU (16 Threads)";
+        txtCpuTitle.Text = string.Format("CPU ({0})", detectedCpu);
         txtCpuTitle.FontWeight = FontWeights.SemiBold;
         txtCpuTitle.FontSize = 11;
         txtCpuTitle.Foreground = new SolidColorBrush(Color.FromRgb(240, 246, 252));
@@ -321,7 +372,7 @@ public class MonitorWindow : Window {
 
         // 4. GPU SECTION
         txtGpuTitle = new TextBlock();
-        txtGpuTitle.Text = "GPU (RTX 3060)";
+        txtGpuTitle.Text = string.Format("GPU ({0})", detectedGpu);
         txtGpuTitle.FontWeight = FontWeights.SemiBold;
         txtGpuTitle.FontSize = 11;
         txtGpuTitle.Foreground = new SolidColorBrush(Color.FromRgb(240, 246, 252));
@@ -347,7 +398,7 @@ public class MonitorWindow : Window {
 
         // 5. RAM SECTION
         txtRamTitle = new TextBlock();
-        txtRamTitle.Text = "RAM (64 GB DDR4)";
+        txtRamTitle.Text = string.Format("RAM ({0} GB Total)", detectedRamGb);
         txtRamTitle.FontWeight = FontWeights.SemiBold;
         txtRamTitle.FontSize = 11;
         txtRamTitle.Foreground = new SolidColorBrush(Color.FromRgb(240, 246, 252));
@@ -371,7 +422,7 @@ public class MonitorWindow : Window {
         pbRamOuter.Child = pbRamInner;
         panel.Children.Add(pbRamOuter);
 
-        // 6. TOTAL POWER SECTION (NEW!)
+        // 6. POWER SECTION
         txtPowerTitle = new TextBlock();
         txtPowerTitle.Text = "⚡ POWER DRAW";
         txtPowerTitle.FontWeight = FontWeights.SemiBold;
@@ -383,7 +434,7 @@ public class MonitorWindow : Window {
         txtPowerDetails.Text = "Loading...";
         txtPowerDetails.FontSize = 11;
         txtPowerDetails.FontFamily = new FontFamily("Consolas, Courier New, monospace");
-        txtPowerDetails.Foreground = new SolidColorBrush(Color.FromRgb(240, 136, 62)); // Warm Amber
+        txtPowerDetails.Foreground = new SolidColorBrush(Color.FromRgb(240, 136, 62));
         txtPowerDetails.HorizontalAlignment = HorizontalAlignment.Right;
         txtPowerDetails.Margin = new Thickness(0, 9, 0, 0);
 
@@ -471,7 +522,6 @@ public class MonitorWindow : Window {
 
     private void UpdateStats() {
         try {
-            // Update Profile Badge
             string schemeName = GetActivePowerSchemeName();
             txtProfileBadge.Text = string.Format("🔋 Profile: {0} (Efficient Boost)", schemeName);
 
@@ -544,13 +594,12 @@ public class MonitorWindow : Window {
                     cpuWatts = cpuMilli / 1000.0;
                     if (cpuWatts < 0) cpuWatts = 0;
                 } catch {
-                    cpuWatts = 18.0; // fallback average
+                    cpuWatts = 18.0;
                 }
             }
             double totalPower = cpuWatts + gpuWatts;
             txtPowerDetails.Text = string.Format("{0:0.0} W  (C: {1:0.0}W  G: {2:0.0}W)", totalPower, cpuWatts, gpuWatts);
 
-            // Max power scale ~175W (45W CPU + 130W GPU)
             double powerPercent = (totalPower / 175.0) * 100.0;
             UpdateBar(pbPowerInner, powerPercent, pbPowerOuter.ActualWidth);
 
