@@ -1,0 +1,16 @@
+# WSL 2 Settings - Antigravity Optimization
+# Balances memory and processor allocation between Windows Host and WSL2
+[wsl2]
+# Caps WSL2 to 16 GB, reserving 48 GB for Windows host multitasking and school apps
+memory=16GB
+
+# Allocates 8 logical cores to WSL, leaving dedicated cores for host OS responsiveness
+processors=8
+
+# Sets lightweight swap file to prevent disk thrashing
+swap=4GB
+
+# Clean up memory dynamically
+autoMemoryReclaim=gradual
+
+localhostForwarding=true

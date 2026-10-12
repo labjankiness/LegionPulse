@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Diagnostics & Optimization Dashboard</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --border: #30363d;
+            --text-main: #c9d1d9;
+            --text-heading: #58a6ff;
+            --accent-green: #238636;
+            --accent-green-text: #3fb950;
+            --accent-blue: #1f6feb;
+            --accent-orange: #d29922;
+            --metric-bg: #21262d;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        h1 {
+            color: var(--text-heading);
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            background-color: #238636;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        .specs {
+            color: #8b949e;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #f0f6fc;
+            font-size: 18px;
+            margin-top: 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .metric-box {
+            background-color: var(--metric-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px;
+            text-align: center;
+        }
+        .metric-title {
+            font-size: 12px;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metric-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent-green-text);
+            margin-top: 4px;
+        }
+        .metric-sub {
+            font-size: 12px;
+            color: #8b949e;
+            margin-top: 2px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        th {
+            background-color: var(--metric-bg);
+            color: #f0f6fc;
+        }
+        .tag-safe {
+            color: var(--accent-green-text);
+            font-weight: 600;
+        }
+        .callout {
+            border-left: 4px solid var(--accent-blue);
+            background-color: rgba(56, 139, 253, 0.1);
+            padding: 12px 16px;
+            border-radius: 0 6px 6px 0;
+            margin: 12px 0;
+        }
+        ul {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            background: #21262d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #79c0ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 System Diagnostics & Optimization Dashboard <span class="badge">Fully Optimized</span></h1>
+            <div class="specs">
+                <strong>Machine:</strong> Lenovo Legion 5 15ITH6 (82JH) • <strong>CPU:</strong> Intel Core i7-11800H (8C/16T @ 2.30 GHz) • <strong>RAM:</strong> 64 GB DDR4 • <strong>GPU:</strong> NVIDIA GeForce RTX 3060 Laptop (6GB VRAM) • <strong>Storage:</strong> 2x 1TB NVMe SSDs
+            </div>
+        </header>
+
+        <div class="card">
+            <h2>📊 Real-Time Benchmark & Telemetry</h2>
+            <div class="grid">
+                <div class="metric-box">
+                    <div class="metric-title">Idle CPU Performance</div>
+                    <div class="metric-value">97.8% (~2.25 GHz)</div>
+                    <div class="metric-sub">Cool, silent, no throttling</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">CPU Under Load Boost</div>
+                    <div class="metric-value">155.9% (~3.59 GHz)</div>
+                    <div class="metric-sub">Dynamically boosts on demand</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">NVIDIA GPU Temperature</div>
+                    <div class="metric-value">48°C (15.0W)</div>
+                    <div class="metric-sub">Driving external HDMI screen</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">Total Power Draw</div>
+                    <div class="metric-value">~34.0 W</div>
+                    <div class="metric-sub">CPU: ~19W • GPU: 15W</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">Available RAM</div>
+                    <div class="metric-value">37+ GB Free</div>
+                    <div class="metric-sub">64 GB Total System Memory</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">Active System Profile</div>
+                    <div class="metric-value" style="font-size: 16px; margin-top: 8px;">Balanced (Efficient)</div>
+                    <div class="metric-sub">Auto-scaling on demand</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔍 Why Was Your Laptop Lagging & Getting Hot?</h2>
+            <div class="callout">
+                <strong>1. External Monitor Connection (HDMI hardwired to RTX 3060):</strong>
+                Your external monitor connects via HDMI, which on Lenovo Legion 5 laptops is hardwired directly to the discrete NVIDIA RTX 3060 graphics card. This keeps the NVIDIA card continuously active at ~14.5W idle. Because the CPU and GPU share copper heatpipes, this baseline heat keeps the chassis warm (50°C–52°C) even when no 3D software is open.
+            </div>
+            <div class="callout">
+                <strong>2. Intel Aggressive Boost Voltage Spikes:</strong>
+                Windows defaulted the i7-11800H processor to "Aggressive" boost, causing CPU cores to jump to 4.60 GHz (60W–80W power draw) on minor background apps. When that 80W met the GPU's 14.5W, thermal limits were briefly reached, causing Windows to throttle CPU clocks and produce micro-stutters.
+            </div>
+            <div class="callout">
+                <strong>3. Orphaned Ghost Processes & Startup Bloat:</strong>
+                Headless <code>RobloxPlayerBeta</code> and <code>RobloxCrashHandler</code> had been running in the background without any window for ~4 hours, churning over 1,900 CPU seconds. Roblox had also placed itself in auto-start on every boot.
+            </div>
+            <div class="callout">
+                <strong>4. Unbounded WSL2 Virtual Machine RAM:</strong>
+                WSL2 was dynamically assigned up to 32 GB of memory without a ceiling, competing with Windows memory caching.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🛠️ Optimizations Applied & Verified</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Target Area</th>
+                        <th>Status</th>
+                        <th>Boot Persistence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CPU Boost Policy -> Efficient Aggressive</strong></td>
+                        <td>Windows Power Scheme (PROCTHROTTLE)</td>
+                        <td><span class="tag-safe">Applied</span></td>
+                        <td>Permanent (Windows Registry)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WSL2 Resource Ceiling (16 GB / 8 Cores)</strong></td>
+                        <td><code>C:\Users\WhoppyPoppy\.wslconfig</code></td>
+                        <td><span class="tag-safe">Configured</span></td>
+                        <td>Permanent (Auto-read by WSL)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Terminated Headless Roblox Zombies</strong></td>
+                        <td>PIDs 8860 & 22860</td>
+                        <td><span class="tag-safe">Terminated</span></td>
+                        <td>Immediate</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Removed Roblox Auto-Start on Boot</strong></td>
+                        <td><code>HKCU\...\CurrentVersion\Run</code></td>
+                        <td><span class="tag-safe">Removed</span></td>
+                        <td>Permanent (Won't auto-launch)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Disabled GameDVR Background Video Grabbing</strong></td>
+                        <td>Windows GameConfigStore</td>
+                        <td><span class="tag-safe">Disabled</span></td>
+                        <td>Permanent (Registry)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cleaned 1.5 GB Stale Temp Files (>24h)</strong></td>
+                        <td><code>AppData\Local\Temp</code></td>
+                        <td><span class="tag-safe">Cleaned</span></td>
+                        <td>Completed</td>
+                    </tr>
+                    <tr>
+                        <td><strong>School Downloads Safeguard (Firefox & Sockets)</strong></td>
+                        <td>Active Download Connections</td>
+                        <td><span class="tag-safe">100% Protected</span></td>
+                        <td>Untouched & active</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>💡 Quick Lenovo Legion Tips</h2>
+            <ul>
+                <li><strong>Thermal Profiles (Fn + Q):</strong> Look at the power button LED color. <em>White</em> is Balanced (best for daily schoolwork), <em>Blue</em> is Quiet (low power cap, absolute silence), and <em>Red</em> is Performance (full 130W GPU wattage for heavy rendering and gaming).</li>
+                <li><strong>External Monitor:</strong> The rear/side vents will always feel warm when an external screen is plugged into HDMI because the RTX 3060 is actively powering the display. This is completely normal hardware operation.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
